@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>$SNOWTV — We All Watched The Same Snow</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Noto+Serif+SC:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080808;
+    --bg2: #111;
+    --cream: #e8e0cc;
+    --dim: #b0a890;
+    --ghost: #4a4438;
+    --accent: #f0e8d0;
+    --green: #7cfc94;
+    --amber: #f0b840;
+    --red: #e05040;
+    --noise-opacity: 0.04;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: var(--noise-opacity);
+    pointer-events: none;
+    z-index: 9999;
+    animation: noiseShift 0.08s steps(1) infinite;
+  }
+
+  /* ── SCANLINES ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.18) 2px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  @keyframes noiseShift {
+    0%   { background-position: 0 0; }
+    25%  { background-position: 10px -5px; }
+    50%  { background-position: -5px 10px; }
+    75%  { background-position: 5px 5px; }
+    100% { background-position: -10px 0; }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(4px);
+  }
+
+  .nav-logo {
+    font-family: 'VT323', monospace;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-decoration: none;
+    position: relative;
+  }
+
+  .nav-logo::after {
+    content: '▌';
+    animation: blink 1s step-end infinite;
+    color: var(--amber);
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--dim);
+    text-decoration: none;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-links a::before {
+    content: '// ';
+    color: var(--ghost);
+  }
+
+  .nav-links a:hover { color: var(--cream); }
+
+  .nav-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--green);
+    letter-spacing: 2px;
+    border: 1px solid var(--green);
+    padding: 0.25rem 0.75rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0 3rem;
+    padding-top: 5rem;
+    gap: 4rem;
+    position: relative;
+  }
+
+  .hero-left { position: relative; z-index: 2; }
+
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--dim);
+    letter-spacing: 4px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--dim);
+  }
+
+  .hero-h1 {
+    font-family: 'VT323', monospace;
+    font-size: clamp(5rem, 12vw, 9rem);
+    line-height: 0.9;
+    color: var(--accent);
+    letter-spacing: -2px;
+    position: relative;
+  }
+
+  .hero-h1 .glitch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero-h1 .glitch::before,
+  .hero-h1 .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+  }
+
+  .hero-h1 .glitch::before {
+    color: var(--red);
+    clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+    animation: glitch1 4s infinite;
+    left: 2px;
+  }
+
+  .hero-h1 .glitch::after {
+    color: var(--green);
+    clip-path: polygon(0 55%, 100% 55%, 100% 70%, 0 70%);
+    animation: glitch2 4s infinite;
+    left: -2px;
+  }
+
+  @keyframes glitch1 {
+    0%, 90%, 100% { transform: translateX(0); opacity: 0; }
+    91% { transform: translateX(-3px); opacity: 0.8; }
+    93% { transform: translateX(3px); opacity: 0.8; }
+    95% { transform: translateX(0); opacity: 0; }
+  }
+
+  @keyframes glitch2 {
+    0%, 88%, 100% { transform: translateX(0); opacity: 0; }
+    89% { transform: translateX(3px); opacity: 0.7; }
+    91% { transform: translateX(-3px); opacity: 0.7; }
+    93% { transform: translateX(0); opacity: 0; }
+  }
+
+  .hero-sub {
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    color: var(--dim);
+    line-height: 1.8;
+    max-width: 420px;
+    font-weight: 400;
+  }
+
+  .hero-sub em {
+    color: var(--amber);
+    font-style: normal;
+  }
+
+  .hero-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0.9rem 2rem;
+    background: var(--cream);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--amber);
+    transform: translateX(-100%);
+    transition: transform 0.2s;
+  }
+
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  .btn-secondary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0.9rem 2rem;
+    background: transparent;
+    color: var(--dim);
+    border: 1px solid var(--ghost);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--dim); color: var(--cream); }
+
+  /* ── TV ILLUSTRATION ── */
+  .hero-tv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  .tv-wrap {
+    position: relative;
+    width: min(380px, 90%);
+    animation: tvFloat 6s ease-in-out infinite;
+  }
+
+  @keyframes tvFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-16px); }
+  }
+
+  .tv-body {
+    background: linear-gradient(160deg, #2a2520 0%, #1a1510 100%);
+    border: 2px solid #3a3530;
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .tv-screen-wrap {
+    background: #000;
+    border-radius: 10px;
+    padding: 4px;
+    position: relative;
+  }
+
+  .tv-screen {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background: #111;
+  }
+
+  .tv-static {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+    background-size: cover;
+    opacity: 0;
+    animation: staticAnim 0.06s steps(1) infinite;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+
+  .tv-static.active { opacity: 0.95; }
+
+  @keyframes staticAnim {
+    0%   { background-position: 0 0; filter: brightness(1); }
+    16%  { background-position: -20px 10px; filter: brightness(1.1); }
+    33%  { background-position: 10px -15px; filter: brightness(0.9); }
+    50%  { background-position: -10px 20px; filter: brightness(1.05); }
+    66%  { background-position: 20px -5px; filter: brightness(0.95); }
+    83%  { background-position: -5px 15px; filter: brightness(1.1); }
+    100% { background-position: 0 0; filter: brightness(1); }
+  }
+
+  /* ── BROADCAST CONTENT ── */
+  .broadcast {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    flex-direction: column;
+    background: #0a0a12;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+  }
+
+  .broadcast.visible { display: flex; }
+
+  /* channel 1: news */
+  .bc-news {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .bc-news-header {
+    background: #c0392b;
+    padding: 3px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .bc-news-logo {
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+
+  .bc-news-time {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 1px;
+  }
+
+  .bc-news-main {
+    flex: 1;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden;
+  }
+
+  .bc-news-headline {
+    font-size: 0.62rem;
+    color: #f0e8d0;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    border-left: 2px solid #c0392b;
+    padding-left: 6px;
+  }
+
+  .bc-news-sub {
+    font-size: 0.5rem;
+    color: #888;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+
+  .bc-news-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 2px 0;
+  }
+
+  .bc-news-ticker {
+    background: #1a1a2e;
+    border-top: 1px solid #c0392b;
+    padding: 3px 8px;
+    flex-shrink: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .bc-news-ticker-inner {
+    display: inline-block;
+    animation: newsTicker 18s linear infinite;
+    font-size: 0.5rem;
+    color: #f0b840;
+    letter-spacing: 1px;
+  }
+
+  @keyframes newsTicker {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* channel 2: crypto market */
+  .bc-crypto {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #050510;
+  }
+
+  .bc-crypto-header {
+    background: #0d1117;
+    border-bottom: 1px solid #7cfc94;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .bc-crypto-logo {
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    color: #7cfc94;
+    letter-spacing: 2px;
+  }
+
+  .bc-crypto-live {
+    font-size: 0.45rem;
+    color: #7cfc94;
+    letter-spacing: 2px;
+    animation: pulse 1s infinite;
+  }
+
+  .bc-crypto-grid {
+    flex: 1;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .bc-coin-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .bc-coin-name {
+    font-size: 0.55rem;
+    color: #b0a890;
+    letter-spacing: 1px;
+    width: 55px;
+  }
+
+  .bc-coin-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    margin: 0 6px;
+    position: relative;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .bc-coin-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 1px;
+    animation: barGrow 2s ease-out forwards;
+  }
+
+  @keyframes barGrow { from { width: 0; } }
+
+  .bc-coin-price {
+    font-size: 0.52rem;
+    letter-spacing: 0.5px;
+    width: 52px;
+    text-align: right;
+  }
+
+  .bc-coin-price.up { color: #7cfc94; }
+  .bc-coin-price.down { color: #e05040; }
+
+  .bc-crypto-footer {
+    background: #0d1117;
+    border-top: 1px solid rgba(124,252,148,0.2);
+    padding: 3px 8px;
+    font-size: 0.45rem;
+    color: rgba(124,252,148,0.5);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .bc-crypto-ticker {
+    display: inline-block;
+    animation: newsTicker 20s linear infinite;
+  }
+
+  /* channel 3: weather */
+  .bc-weather {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(180deg, #0a0a2a 0%, #0a1a0a 100%);
+  }
+
+  .bc-weather-header {
+    background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .bc-weather-logo {
+    font-family: 'VT323', monospace;
+    font-size: 0.85rem;
+    color: #b0d4f0;
+    letter-spacing: 2px;
+  }
+
+  .bc-weather-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .bc-weather-icon {
+    font-family: 'VT323', monospace;
+    font-size: 2rem;
+    color: #f0b840;
+    line-height: 1;
+    animation: iconPulse 3s ease-in-out infinite;
+  }
+
+  .bc-weather-temp {
+    font-family: 'VT323', monospace;
+    font-size: 2.2rem;
+    color: #e8e0cc;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .bc-weather-city {
+    font-size: 0.5rem;
+    color: #b0a890;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .bc-weather-details {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .bc-weather-detail {
+    font-size: 0.45rem;
+    color: #7a9ab0;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .bc-weather-detail span {
+    display: block;
+    color: #b0c8d8;
+    font-size: 0.5rem;
+  }
+
+  .bc-weather-footer {
+    padding: 4px 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .bc-weather-city-row {
+    font-size: 0.45rem;
+    color: #556;
+    letter-spacing: 1px;
+  }
+
+  .bc-weather-city-row span {
+    color: #7a9ab0;
+    display: block;
+  }
+
+  /* channel 4: static/snow */
+  .bc-static-full {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+    background-size: cover;
+    animation: staticAnim 0.06s steps(1) infinite;
+    z-index: 1;
+  }
+
+  .bc-static-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .bc-static-ch {
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 6px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    animation: flicker2 2s infinite;
+  }
+
+  .bc-static-token {
+    font-family: 'VT323', monospace;
+    font-size: 2rem;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.6);
+    animation: flicker2 1.5s infinite 0.3s;
+  }
+
+  @keyframes flicker2 {
+    0%, 92%, 100% { opacity: 1; }
+    93% { opacity: 0.2; }
+    95% { opacity: 1; }
+    97% { opacity: 0.1; }
+  }
+
+  /* channel nav buttons */
+  .tv-ch-buttons {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+    justify-content: center;
+  }
+
+  .tv-ch-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    padding: 3px 7px;
+    background: #1a1510;
+    border: 1px solid #3a3530;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .tv-ch-btn:hover, .tv-ch-btn.active {
+    background: #2a2520;
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 0.85; }
+    96% { opacity: 0.3; }
+    97% { opacity: 0.85; }
+    98% { opacity: 0.2; }
+    99% { opacity: 0.85; }
+  }
+
+  /* scanlines on screen */
+  .tv-scanlines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0,0,0,0.25) 3px,
+      rgba(0,0,0,0.25) 4px
+    );
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* CRT curve vignette */
+  .tv-vignette {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.7);
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .tv-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding: 0 0.25rem;
+  }
+
+  .tv-knobs {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .knob {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #555, #222);
+    border: 2px solid #444;
+    position: relative;
+  }
+
+  .knob::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px; height: 8px;
+    background: #888;
+    transform: translate(-50%, -80%);
+    border-radius: 1px;
+  }
+
+  .tv-label {
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    color: #555;
+    letter-spacing: 3px;
+  }
+
+  /* antenna */
+  .antenna-wrap {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+  }
+
+  .antenna-base {
+    width: 20px;
+    height: 8px;
+    background: #3a3530;
+    border-radius: 2px;
+    margin: 0 auto;
+  }
+
+  .antenna-left, .antenna-right {
+    position: absolute;
+    bottom: 6px;
+    width: 2px;
+    height: 55px;
+    background: linear-gradient(to top, #555, #888);
+    border-radius: 1px;
+  }
+
+  .antenna-left {
+    left: 30px;
+    transform-origin: bottom center;
+    transform: rotate(-30deg);
+  }
+
+  .antenna-right {
+    right: 30px;
+    transform-origin: bottom center;
+    transform: rotate(30deg);
+  }
+
+  /* glow under TV */
+  .tv-glow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 20px;
+    background: radial-gradient(ellipse, rgba(240,184,64,0.15) 0%, transparent 70%);
+    filter: blur(8px);
+  }
+
+  /* ── TICKER ── */
+  .ticker {
+    border-top: 1px solid var(--ghost);
+    border-bottom: 1px solid var(--ghost);
+    padding: 0.6rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    background: rgba(255,255,255,0.015);
+  }
+
+  .ticker-inner {
+    display: inline-flex;
+    gap: 0;
+    animation: tickerScroll 30s linear infinite;
+  }
+
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ghost);
+    letter-spacing: 2px;
+    padding: 0 2.5rem;
+    text-transform: uppercase;
+  }
+
+  .ticker-item.highlight { color: var(--amber); }
+
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── SECTION: MEMORY ── */
+  #memory {
+    padding: 8rem 3rem;
+    position: relative;
+  }
+
+  .section-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 5px;
+    color: var(--ghost);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ghost);
+    max-width: 60px;
+  }
+
+  .memory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    border: 1px solid var(--ghost);
+    margin-top: 3rem;
+  }
+
+  .memory-card {
+    padding: 2.5rem 2rem;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+    background: rgba(255,255,255,0.01);
+  }
+
+  .memory-card:not(:last-child) {
+    border-right: 1px solid var(--ghost);
+  }
+
+  .memory-card:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .memory-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    font-family: 'VT323', monospace;
+    font-size: 4rem;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .memory-icon {
+    font-family: 'VT323', monospace;
+    font-size: 2.5rem;
+    color: var(--amber);
+    margin-bottom: 1rem;
+    display: block;
+    animation: iconPulse 4s ease-in-out infinite;
+  }
+
+  .memory-card:nth-child(2) .memory-icon { color: var(--green); animation-delay: 1s; }
+  .memory-card:nth-child(3) .memory-icon { color: var(--dim); animation-delay: 2s; }
+
+  @keyframes iconPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .memory-title {
+    font-family: 'VT323', monospace;
+    font-size: 1.6rem;
+    color: var(--cream);
+    margin-bottom: 0.75rem;
+    letter-spacing: 1px;
+  }
+
+  .memory-body {
+    font-size: 0.88rem;
+    color: var(--dim);
+    line-height: 1.9;
+  }
+
+  /* ── SECTION: TOKENOMICS ── */
+  #tokenomics {
+    padding: 8rem 3rem;
+    position: relative;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .toko-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 3rem;
+    align-items: start;
+  }
+
+  .toko-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .toko-table tr {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .toko-table tr:first-child {
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .toko-table td {
+    padding: 1rem 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  .toko-table td:first-child {
+    color: var(--ghost);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .toko-table td:last-child {
+    color: var(--cream);
+    text-align: right;
+  }
+
+  .toko-table td:last-child.highlight { color: var(--amber); }
+
+  .toko-big {
+    text-align: right;
+  }
+
+  .toko-big .label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ghost);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .toko-big .number {
+    font-family: 'VT323', monospace;
+    font-size: 4rem;
+    color: var(--cream);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .toko-big .unit {
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    color: var(--dim);
+    margin-left: 0.25rem;
+  }
+
+  .toko-bar-wrap {
+    margin-top: 2rem;
+  }
+
+  .toko-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ghost);
+    letter-spacing: 1px;
+    margin-bottom: 0.4rem;
+  }
+
+  .toko-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toko-bar-fill {
+    position: absolute;
+    inset-y: 0;
+    left: 0;
+    background: var(--amber);
+    animation: barFill 2s ease-out forwards;
+    width: 0;
+  }
+
+  .toko-bar:nth-child(2) .toko-bar-fill { background: var(--green); animation-delay: 0.2s; }
+  .toko-bar:nth-child(3) .toko-bar-fill { background: var(--dim); animation-delay: 0.4s; }
+
+  @keyframes barFill {
+    to { width: var(--w); }
+  }
+
+  /* ── SECTION: MANIFESTO ── */
+  #manifesto {
+    padding: 8rem 3rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .manifesto-text {
+    max-width: 680px;
+    margin: 3rem auto 0;
+  }
+
+  .manifesto-text p {
+    font-size: 1.1rem;
+    line-height: 2.1;
+    color: var(--dim);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+  }
+
+  .manifesto-text p strong {
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  .manifesto-text .quote-line {
+    font-family: 'VT323', monospace;
+    font-size: 1.8rem;
+    color: var(--amber);
+    letter-spacing: 2px;
+    display: block;
+    margin: 2rem 0;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--amber);
+  }
+
+  /* ── SECTION: COMMUNITY ── */
+  #community {
+    padding: 6rem 3rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    text-align: center;
+  }
+
+  .community-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .social-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0.85rem 1.75rem;
+    border: 1px solid var(--ghost);
+    color: var(--dim);
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .social-btn:hover {
+    border-color: var(--cream);
+    color: var(--cream);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .social-btn .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 2rem 3rem;
+    border-top: 1px solid var(--ghost);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer .left {
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    color: var(--ghost);
+    letter-spacing: 3px;
+  }
+
+  footer .right {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ghost);
+    letter-spacing: 2px;
+  }
+
+  /* corner decoration */
+  .corner {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  .corner::before, .corner::after {
+    content: '';
+    position: absolute;
+    background: var(--ghost);
+  }
+
+  .corner.tl { top: 1.5rem; left: 1.5rem; }
+  .corner.tr { top: 1.5rem; right: 1.5rem; }
+  .corner.bl { bottom: 1.5rem; left: 1.5rem; }
+  .corner.br { bottom: 1.5rem; right: 1.5rem; }
+
+  .corner.tl::before, .corner.tr::before, .corner.bl::before, .corner.br::before {
+    width: 100%; height: 1px; top: 0; left: 0;
+  }
+
+  .corner.tl::after, .corner.tr::after, .corner.bl::after, .corner.br::after {
+    width: 1px; height: 100%; top: 0; left: 0;
+  }
+
+  .corner.tr::before { left: auto; right: 0; }
+  .corner.tr::after  { left: auto; right: 0; }
+  .corner.bl::before { top: auto; bottom: 0; }
+  .corner.bl::after  { top: auto; bottom: 0; }
+  .corner.br::before { top: auto; bottom: 0; left: auto; right: 0; }
+  .corner.br::after  { left: auto; right: 0; top: auto; bottom: 0; }
+
+  /* section headings */
+  .section-h2 {
+    font-family: 'VT323', monospace;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    color: var(--cream);
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+
+  /* mobile */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero { grid-template-columns: 1fr; padding: 6rem 1.5rem 3rem; gap: 3rem; }
+    .hero-tv { order: -1; }
+    .memory-grid { grid-template-columns: 1fr; }
+    .memory-card:not(:last-child) { border-right: none; border-bottom: 1px solid var(--ghost); }
+    .toko-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .toko-big { text-align: left; }
+    #memory, #tokenomics, #manifesto, #community { padding: 5rem 1.5rem; }
+    footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Corner decorations -->
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">$SNOWTV</a>
+  <ul class="nav-links">
+    <li><a href="#memory">Memory</a></li>
+    <li><a href="#tokenomics">Token</a></li>
+    <li><a href="#manifesto">Manifesto</a></li>
+    <li><a href="#community">Community</a></li>
+  </ul>
+  <div class="nav-tag">● LIVE</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag">PUMP.FUN · EAST ASIA COLLECTIVE · 2024</div>
+    <h1 class="hero-h1">
+      <span class="glitch" data-text="SNOW">SNOW</span><br/>
+      <span class="glitch" data-text="TV">TV</span>
+    </h1>
+    <p class="hero-sub">
+      It was late. Your parents were asleep.<br/>
+      You sat alone in front of the TV and changed the channel —<br/>
+      <em>and the screen turned to snow.</em><br/>
+      That image lived in all of us.
+    </p>
+    <div class="hero-actions">
+      <a href="https://x.com/SNOWTVRUN" target="_blank" class="btn-primary"><span>Follow on X / Twitter</span></a>
+      <a href="#manifesto" class="btn-secondary">Learn More</a>
+    </div>
+  </div>
+
+  <div class="hero-tv">
+    <div class="tv-wrap">
+      <!-- antenna -->
+      <div class="antenna-wrap">
+        <div class="antenna-base"></div>
+        <div class="antenna-left"></div>
+        <div class="antenna-right"></div>
+      </div>
+      <!-- body -->
+      <div class="tv-body">
+        <div class="tv-screen-wrap">
+          <div class="tv-screen">
+
+            <!-- static flash overlay (channel switching) -->
+            <div class="tv-static" id="tvStatic"></div>
+
+            <!-- CH 1: NEWS -->
+            <div class="broadcast bc-news-wrap visible" id="ch1">
+              <div class="bc-news">
+                <div class="bc-news-header">
+                  <span class="bc-news-logo">▶ SNOW NEWS</span>
+                  <span class="bc-news-time" id="tvClock">00:00:00</span>
+                </div>
+                <div class="bc-news-main">
+                  <div class="bc-news-headline" id="newsHeadline">$SNOWTV LAUNCHES ON SOLANA — EAST ASIA COMMUNITY RALLIES AROUND NOSTALGIC MEME TOKEN</div>
+                  <div class="bc-news-sub" id="newsSub">The token, inspired by the late-night static screens of the 80s and 90s, has gained rapid traction across China, Japan, and Korea crypto communities. Analysts note unusually strong cultural cohesion among early holders.</div>
+                  <div class="bc-news-divider"></div>
+                  <div class="bc-news-headline" style="font-size:0.52rem; color:#b0a890; border-color:#555;">RELATED: PUMP.FUN SEES SURGE IN NOSTALGIA-THEMED TOKENS — ANALYSTS CALL IT "MEMORY ECONOMY"</div>
+                  <div class="bc-news-sub">Solana blockchain continues to attract culturally-driven meme projects. $SNOWTV is among the first to tap into cross-border East Asian identity as its core narrative.</div>
+                </div>
+                <div class="bc-news-ticker">
+                  <span class="bc-news-ticker-inner">BREAKING: $SNOWTV NOW LIVE ON PUMP.FUN · SOL MARKET HEATING UP · EAST ASIA CRYPTO COMMUNITY GROWING FAST · NO TAX · NO BLACKLIST · MINT REVOKED · WE ALL WATCHED THE SAME SNOW · $SNOWTV TO THE MOON · CHANNEL 00 · TUNE IN ·&nbsp;&nbsp;&nbsp;</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CH 2: CRYPTO MARKET -->
+            <div class="broadcast bc-crypto" id="ch2">
+              <div class="bc-crypto-header">
+                <span class="bc-crypto-logo">▶ CRYPTO MKT</span>
+                <span class="bc-crypto-live">● LIVE</span>
+              </div>
+              <div class="bc-crypto-grid">
+                <div class="bc-coin-row">
+                  <span class="bc-coin-name">$SNOWTV</span>
+                  <div class="bc-coin-bar"><div class="bc-coin-fill" style="width:88%; background:#f0b840;"></div></div>
+                  <span class="bc-coin-price up">+∞%</span>
+                </div>
+                <div class="bc-coin-row">
+                  <span class="bc-coin-name">SOL</span>
+                  <div class="bc-coin-bar"><div class="bc-coin-fill" style="width:72%; background:#7cfc94;"></div></div>
+                  <span class="bc-coin-price up">+4.2%</span>
+                </div>
+                <div class="bc-coin-row">
+                  <span class="bc-coin-name">BTC</span>
+                  <div class="bc-coin-bar"><div class="bc-coin-fill" style="width:60%; background:#7cfc94;"></div></div>
+                  <span class="bc-coin-price up">+1.8%</span>
+                </div>
+                <div class="bc-coin-row">
+                  <span class="bc-coin-name">ETH</span>
+                  <div class="bc-coin-bar"><div class="bc-coin-fill" style="width:42%; background:#e05040;"></div></div>
+                  <span class="bc-coin-price down">-0.6%</span>
+                </div>
+                <div class="bc-coin-row">
+                  <span class="bc-coin-name">DOGE</span>
+                  <div class="bc-coin-bar"><div class="bc-coin-fill" style="width:55%; background:#7cfc94;"></div></div>
+                  <span class="bc-coin-price up">+3.1%</span>
+                </div>
+                <div class="bc-coin-row">
+                  <span class="bc-coin-name">BONK</span>
+                  <div class="bc-coin-bar"><div class="bc-coin-fill" style="width:38%; background:#e05040;"></div></div>
+                  <span class="bc-coin-price down">-2.4%</span>
+                </div>
+              </div>
+              <div class="bc-crypto-footer">
+                <span class="bc-crypto-ticker">POWERED BY SOLANA · DATA DELAYED · NOT FINANCIAL ADVICE · $SNOWTV IS #1 IN OUR HEARTS · BUY THE SNOW · HOLD THE SIGNAL · PUMP.FUN · $SNOWTV · $SNOWTV · $SNOWTV ·&nbsp;&nbsp;</span>
+              </div>
+            </div>
+
+            <!-- CH 3: WEATHER -->
+            <div class="broadcast bc-weather" id="ch3">
+              <div class="bc-weather-header">
+                <span class="bc-weather-logo">▶ WEATHER CH</span>
+                <span style="font-size:0.45rem; color:#556; letter-spacing:1px;">EAST ASIA</span>
+              </div>
+              <div class="bc-weather-main">
+                <div class="bc-weather-icon" id="wxIcon">☁</div>
+                <div class="bc-weather-temp" id="wxTemp">—°</div>
+                <div class="bc-weather-city" id="wxCity">LOADING...</div>
+                <div class="bc-weather-details">
+                  <div class="bc-weather-detail">HUMIDITY<span id="wxHum">—%</span></div>
+                  <div class="bc-weather-detail">WIND<span id="wxWind">— km/h</span></div>
+                  <div class="bc-weather-detail">FEELS<span id="wxFeel">—°</span></div>
+                </div>
+              </div>
+              <div class="bc-weather-footer">
+                <div class="bc-weather-city-row">TOKYO<span id="wx1">☁ 18°</span></div>
+                <div class="bc-weather-city-row">SEOUL<span id="wx2">⛅ 14°</span></div>
+                <div class="bc-weather-city-row">BEIJING<span id="wx3">🌤 22°</span></div>
+                <div class="bc-weather-city-row">TAIPEI<span id="wx4">🌧 26°</span></div>
+              </div>
+            </div>
+
+            <!-- CH 00: SNOW / STATIC -->
+            <div class="broadcast" id="ch0" style="position:relative; background:#000;">
+              <div class="bc-static-full"></div>
+              <div class="bc-static-overlay">
+                <span class="bc-static-ch">CH · 00</span>
+                <span class="bc-static-token">$SNOWTV</span>
+              </div>
+            </div>
+
+            <div class="tv-scanlines"></div>
+            <div class="tv-vignette"></div>
+          </div>
+        </div>
+        <div class="tv-controls">
+          <div class="tv-knobs">
+            <div class="knob"></div>
+            <div class="knob"></div>
+          </div>
+          <div class="tv-label" id="chLabel">CH · 01</div>
+        </div>
+      </div>
+      <!-- channel buttons below TV -->
+      <div class="tv-ch-buttons">
+        <button class="tv-ch-btn active" onclick="switchCh(1)">CH 01<br/>NEWS</button>
+        <button class="tv-ch-btn" onclick="switchCh(2)">CH 02<br/>MARKET</button>
+        <button class="tv-ch-btn" onclick="switchCh(3)">CH 03<br/>WEATHER</button>
+        <button class="tv-ch-btn" onclick="switchCh(0)">CH 00<br/>SNOW</button>
+      </div>
+      <div class="tv-glow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item highlight">$SNOWTV</span>
+    <span class="ticker-item">WE ALL WATCHED THE SAME SNOW</span>
+    <span class="ticker-item highlight">// あの砂嵐、覚えてる？ //</span>
+    <span class="ticker-item">그 눈보라 기억해?</span>
+    <span class="ticker-item highlight">CHANNEL 00 · NO SIGNAL</span>
+    <span class="ticker-item">EAST ASIA COLLECTIVE MEMORY</span>
+    <span class="ticker-item highlight">// PUMP.FUN · SOLANA //</span>
+    <span class="ticker-item">TUNE IN · FIND YOUR SIGNAL</span>
+    <span class="ticker-item highlight">$SNOWTV</span>
+    <span class="ticker-item">WE ALL WATCHED THE SAME SNOW</span>
+    <span class="ticker-item highlight">// あの砂嵐、覚えてる？ //</span>
+    <span class="ticker-item">그 눈보라 기억해?</span>
+    <span class="ticker-item highlight">CHANNEL 00 · NO SIGNAL</span>
+    <span class="ticker-item">EAST ASIA COLLECTIVE MEMORY</span>
+    <span class="ticker-item highlight">// PUMP.FUN · SOLANA //</span>
+    <span class="ticker-item">TUNE IN · FIND YOUR SIGNAL</span>
+  </div>
+</div>
+
+<!-- MEMORY -->
+<section id="memory">
+  <div class="section-eyebrow">0x01 · Collective Memory</div>
+  <h2 class="section-h2">Every late night,<br/>the same channel.</h2>
+  <div class="memory-grid">
+    <div class="memory-card" data-num="01">
+      <span class="memory-icon">▓▒░</span>
+      <div class="memory-title">The Snow Screen</div>
+      <div class="memory-body">
+        It was after midnight. The broadcast ended. The screen filled with white noise —
+        a blizzard of static that went nowhere and said nothing.
+        You didn't turn it off. You just sat there, watching.<br/><br/>
+        That snow wasn't broken. It was honest.
+        No advertisements. No anchors. No agenda.
+        Just pure, unfiltered chaos — and somehow, that felt like
+        the most real thing on television.
+      </div>
+    </div>
+    <div class="memory-card" data-num="02">
+      <span class="memory-icon">◈ SIGNAL</span>
+      <div class="memory-title">No Borders, One Screen</div>
+      <div class="memory-body">
+        In China, Japan, Korea, Taiwan — the languages were different,
+        but the screen was the same. That hissing white blizzard
+        played in every living room, every bedroom, every city
+        that stayed up past the broadcast schedule.<br/><br/>
+        No one planned it. No one organized it.
+        An entire generation of East Asia grew up
+        sharing the same last frame of the night —
+        a screen full of nothing, full of everything.
+      </div>
+    </div>
+    <div class="memory-card" data-num="03">
+      <span class="memory-icon">⬛ ON-CHAIN</span>
+      <div class="memory-title">A New Channel</div>
+      <div class="memory-body">
+        The old channels went dark a long time ago.
+        Traditional finance. Legacy media. Centralized everything.
+        They all broadcast the same signal — and then they stopped.<br/><br/>
+        We kept searching. We kept tuning.
+        And somewhere in the noise of Web3, between the chaos
+        and the static, we found each other again.
+        $SNOWTV is where we reconnect — on-chain, without permission,
+        just like that late night signal that never asked for one.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOKENOMICS -->
+<section id="tokenomics">
+  <div class="section-eyebrow">0x02 · Token Info</div>
+  <h2 class="section-h2">$SNOWTV</h2>
+  <div class="toko-grid">
+    <div>
+      <table class="toko-table">
+        <tr><td>Token Name</td><td class="highlight">$SNOWTV</td></tr>
+        <tr><td>Network</td><td>Solana</td></tr>
+        <tr><td>Platform</td><td>Pump.fun</td></tr>
+        <tr><td>Total Supply</td><td>1,000,000,000</td></tr>
+        <tr><td>Buy / Sell Tax</td><td class="highlight">0 / 0</td></tr>
+        <tr><td>Blacklist</td><td>None</td></tr>
+        <tr><td>Mint Authority</td><td>Revoked</td></tr>
+      </table>
+
+      <div class="toko-bar-wrap" style="margin-top:2rem;">
+        <div class="toko-bar-label"><span>Liquidity</span><span>50%</span></div>
+        <div class="toko-bar"><div class="toko-bar-fill" style="--w:50%;"></div></div>
+      </div>
+      <div class="toko-bar-wrap" style="margin-top:1rem;">
+        <div class="toko-bar-label"><span>Community</span><span>40%</span></div>
+        <div class="toko-bar" style="margin-top:4px;"><div class="toko-bar-fill" style="--w:40%; background:var(--green);"></div></div>
+      </div>
+      <div class="toko-bar-wrap" style="margin-top:1rem;">
+        <div class="toko-bar-label"><span>Marketing</span><span>10%</span></div>
+        <div class="toko-bar" style="margin-top:4px;"><div class="toko-bar-fill" style="--w:10%; background:var(--dim);"></div></div>
+      </div>
+    </div>
+
+    <div class="toko-big">
+      <div class="label">Total Supply</div>
+      <div>
+        <span class="number">1B</span>
+        <span class="unit">$SNOWTV</span>
+      </div>
+      <div style="margin-top:3rem; border-top:1px solid rgba(255,255,255,0.06); padding-top:2rem;">
+        <div class="label" style="margin-bottom:0.75rem;">Contract Address</div>
+        <div style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--ghost); letter-spacing:1px; word-break:break-all; text-align:right; line-height:1.8;">
+          TBA · Coming Soon<br/>Stay tuned on X / Twitter
+        </div>
+      </div>
+      <div style="margin-top:2rem;">
+        <a href="https://x.com/SNOWTVRUN" target="_blank" class="btn-primary" style="width:100%; display:block; text-align:center;"><span>Follow on X / Twitter</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section id="manifesto">
+  <div class="section-eyebrow">0x03 · Manifesto</div>
+  <h2 class="section-h2">We All Watched<br/>The Same Snow</h2>
+  <div class="manifesto-text">
+    <p>
+      You remember the feeling. It was late — later than you were supposed to be awake.
+      The house was quiet. Your parents had long gone to bed.
+      And you sat there alone, in the blue glow of a television set,
+      flipping through channels until there were no more channels left.
+    </p>
+    <p>
+      <strong>And then: static.</strong> A full screen of white noise.
+      No picture. No voice. Just that low, endless hiss —
+      like the TV itself was breathing.
+      You didn't turn it off. You watched it.
+      For a minute, maybe more. Maybe a long time.
+    </p>
+    <span class="quote-line">"That screen wasn't empty. It was honest."</span>
+    <p>
+      It didn't sell you anything. It didn't tell you what to think.
+      It was just pure, raw signal — going nowhere,
+      meaning everything. In China, in Japan, in Korea, in Taiwan —
+      <strong>we all sat in front of that same snow.</strong>
+      Different cities, different languages, same last frame of the night.
+    </p>
+    <p>
+      Decades passed. We grew up. We moved on.
+      The old TVs were thrown out. The channels changed.
+      The internet arrived and filled every silence with noise of a different kind —
+      louder, faster, and somehow emptier than that static ever was.
+    </p>
+    <span class="quote-line">"The broadcast ended. We kept searching."</span>
+    <p>
+      Traditional finance stopped broadcasting for us a long time ago.
+      Legacy media stopped making sense. Every institution that once felt permanent
+      went off the air one by one — and left us staring at a different kind of static.
+    </p>
+    <p>
+      But we never stopped tuning. We found Web3.
+      We found on-chain. We found each other — again —
+      in a new kind of noise, a new kind of signal.
+      <strong>$SNOWTV is that signal.</strong>
+      A token built from a shared memory, for everyone who once sat alone
+      in the dark and watched the snow and felt, somehow, less alone.
+    </p>
+    <span class="quote-line">We all watched the same snow. Now we build together.</span>
+  </div>
+</section>
+
+<!-- COMMUNITY -->
+<section id="community">
+  <div class="section-eyebrow" style="justify-content:center;">0x04 · Join The Channel</div>
+  <h2 class="section-h2" style="text-align:center; margin-top:0.5rem;">Tune In.</h2>
+  <p style="font-family:'Share Tech Mono',monospace; font-size:0.8rem; color:var(--ghost); letter-spacing:2px; margin-top:1rem; text-align:center;">
+    CH.00 · NO SIGNAL · FIND YOUR FREQUENCY
+  </p>
+  <div class="community-links">
+    <a href="https://x.com/SNOWTVRUN" target="_blank" class="social-btn">
+      <span class="dot"></span> Twitter / X
+    </a>
+    <a href="#" class="social-btn">
+      <span class="dot"></span> Telegram
+    </a>
+    <a href="#" class="social-btn">
+      <span class="dot"></span> Pump.fun
+    </a>
+    <a href="#" class="social-btn">
+      <span class="dot"></span> Dexscreener
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="left">$SNOWTV · CH.00</div>
+  <div class="right">
+    We all watched the same snow.<br/>
+    © 2024 SNOWTV · BUILT ON SOLANA
+  </div>
+</footer>
+
+<script>
+  // ── BAR ANIMATIONS ──
+  const bars = document.querySelectorAll('.toko-bar-fill');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.style.animationPlayState = 'running'; });
+  }, { threshold: 0.3 });
+  bars.forEach(b => { b.style.animationPlayState = 'paused'; obs.observe(b); });
+
+  // ── TV CLOCK ──
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    const el = document.getElementById('tvClock');
+    if (el) el.textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── CHANNEL SWITCHING ──
+  let currentCh = 1;
+  const channels = [0,1,2,3];
+  const chLabels = { 0:'CH · 00', 1:'CH · 01', 2:'CH · 02', 3:'CH · 03' };
+
+  function switchCh(n) {
+    if (n === currentCh) return;
+    const staticEl = document.getElementById('tvStatic');
+    staticEl.classList.add('active');
+
+    setTimeout(() => {
+      // hide all
+      [0,1,2,3].forEach(i => {
+        const el = document.getElementById('ch'+i);
+        if (el) el.classList.remove('visible');
+      });
+      // show new
+      const target = document.getElementById('ch'+n);
+      if (target) target.classList.add('visible');
+      document.getElementById('chLabel').textContent = chLabels[n];
+      currentCh = n;
+
+      // update buttons
+      document.querySelectorAll('.tv-ch-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === channels.indexOf(n));
+      });
+
+      staticEl.classList.remove('active');
+    }, 280);
+  }
+
+  // ── ROTATING NEWS HEADLINES ──
+  const headlines = [
+    { h: '$SNOWTV LAUNCHES ON SOLANA — EAST ASIA COMMUNITY RALLIES AROUND NOSTALGIC MEME TOKEN', s: 'The token, inspired by late-night static screens of the 80s and 90s, has gained rapid traction across China, Japan, and Korea crypto communities.' },
+    { h: 'PUMP.FUN SEES SURGE IN NOSTALGIA-THEMED TOKENS — ANALYSTS CALL IT "MEMORY ECONOMY"', s: 'Culturally-driven meme projects are reshaping the Solana ecosystem. $SNOWTV leads the charge with its cross-border East Asian identity narrative.' },
+    { h: 'EAST ASIA GEN X AND MILLENNIALS FIND COMMON GROUND ON-CHAIN WITH $SNOWTV', s: 'Holders from Tokyo, Seoul, Beijing and Taipei report unusually strong community cohesion. "We all watched the same snow," says one early adopter.' },
+    { h: '0% TAX, NO BLACKLIST, MINT REVOKED — $SNOWTV SETS NEW STANDARD FOR TRANSPARENT MEME COINS', s: 'The project\'s clean tokenomics have earned trust from seasoned DeFi participants. Community governance is already underway on Telegram.' },
+    { h: 'SOLANA MEME SEASON CONTINUES — $SNOWTV EMERGES AS CULTURAL STANDOUT AMID NOISE', s: 'In a crowded market, projects with genuine narrative are pulling ahead. $SNOWTV\'s nostalgic angle resonates deeply with the 25-40 demographic.' },
+  ];
+  let hIdx = 0;
+  setInterval(() => {
+    hIdx = (hIdx + 1) % headlines.length;
+    const h = document.getElementById('newsHeadline');
+    const s = document.getElementById('newsSub');
+    if (h && s) {
+      h.style.opacity = '0';
+      s.style.opacity = '0';
+      setTimeout(() => {
+        h.textContent = headlines[hIdx].h;
+        s.textContent = headlines[hIdx].s;
+        h.style.transition = 'opacity 0.5s';
+        s.style.transition = 'opacity 0.5s';
+        h.style.opacity = '1';
+        s.style.opacity = '1';
+      }, 400);
+    }
+  }, 6000);
+
+  // ── WEATHER DATA ──
+  const cities = [
+    { name:'TOKYO', icon:'☁', temp:'18°C', hum:'72%', wind:'12 km/h', feel:'16°C' },
+    { name:'SEOUL', icon:'⛅', temp:'14°C', hum:'58%', wind:'18 km/h', feel:'12°C' },
+    { name:'BEIJING', icon:'☀', temp:'22°C', hum:'45%', wind:'8 km/h', feel:'21°C' },
+    { name:'TAIPEI', icon:'🌧', temp:'26°C', hum:'88%', wind:'22 km/h', feel:'28°C' },
+    { name:'SHANGHAI', icon:'🌤', temp:'20°C', hum:'66%', wind:'14 km/h', feel:'19°C' },
+    { name:'OSAKA', icon:'⛅', temp:'17°C', hum:'70%', wind:'10 km/h', feel:'15°C' },
+  ];
+  let wxIdx = 0;
+  function rotateWeather() {
+    const city = cities[wxIdx % cities.length];
+    const icon = document.getElementById('wxIcon');
+    const temp = document.getElementById('wxTemp');
+    const name = document.getElementById('wxCity');
+    const hum  = document.getElementById('wxHum');
+    const wind = document.getElementById('wxWind');
+    const feel = document.getElementById('wxFeel');
+    if (icon) icon.textContent = city.icon;
+    if (temp) temp.textContent = city.temp;
+    if (name) name.textContent = city.name;
+    if (hum)  hum.textContent  = city.hum;
+    if (wind) wind.textContent = city.wind;
+    if (feel) feel.textContent = city.feel;
+    wxIdx++;
+  }
+  rotateWeather();
+  setInterval(rotateWeather, 4000);
+
+  // ── SCROLL GLITCH ──
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const s = window.scrollY;
+    if (Math.abs(s - lastScroll) > 80) {
+      document.body.style.setProperty('--noise-opacity', '0.09');
+      setTimeout(() => document.body.style.setProperty('--noise-opacity', '0.04'), 150);
+    }
+    lastScroll = s;
+  });
+
+  // ── KNOB CLICK = NEXT CHANNEL ──
+  document.querySelectorAll('.knob').forEach(k => {
+    k.style.cursor = 'pointer';
+    k.addEventListener('click', () => {
+      const next = (channels.indexOf(currentCh) + 1) % channels.length;
+      switchCh(channels[next]);
+      // animate knob
+      k.style.transform = 'rotate(45deg)';
+      setTimeout(() => k.style.transform = '', 200);
+    });
+  });
+</script>
+</body>
+</html>
